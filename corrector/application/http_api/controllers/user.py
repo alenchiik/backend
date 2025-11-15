@@ -21,11 +21,11 @@ class UserDb(BaseModel):
     """Пользователь"""
     id: int | None = Field(description="Идентификатор", default=None)
     first_name: str = Field(description="Имя")
-    surname_name: str = Field(description="Фамилия")
-    patronomic_name: str = Field(description="Отчество")
+    surname_name: str = Field(description="Фамилия",default=None)
+    patronomic_name: str = Field(description="Отчество",default=None)
     user_name: str = Field(description="Логин")
     password: str = Field(description="Пароль")
-    tg_username:str = Field(description="Telegram")
+    tg_username:str = Field(description="Telegram",default=None)
     is_tg_subscribed:bool = Field(description="Проверка подписки",default=False)
     is_admin:bool = Field(description="Проверка на админа")
     theme:str = Field(description="Тема интерфейса Dark/Light")
@@ -42,16 +42,20 @@ async def get_users(session: SessionDep):
 @router.post(path='',response_model=list[UserDb])
 async def post_user(body: UserDb, session: SessionDep):
     """Запрос: создание нового пользователя"""
-    exists = session.execute( #типа проверка на дубл
-        select(User).where(
-            (User.user_name == body.user_name)
-        )
-    ).scalar_one_or_none()
+    exists = (await session.execute( #проверка уже имеющегося username
+        select(User).where(User.user_name == body.user_name)
+    )).scalar_one_or_none()
     if exists:
-        raise HTTPException(
-            status_code=400,
-            detail="Пользователь с таким логином уже существует"
-        )
+        raise HTTPException(status_code=400, detail="Логин уже занят")
+
+    # Проверка TG username
+    if body.tg_username:
+        tg_exists = (await session.execute(
+            select(User).where(User.tg_username == body.tg_username)
+        )).scalar_one_or_none()
+        if tg_exists:
+            raise HTTPException(status_code=400, detail="TG username уже используется")
+        
     new_user = User(
         first_name=body.first_name,
         surname_name=body.surname_name,
@@ -59,7 +63,7 @@ async def post_user(body: UserDb, session: SessionDep):
         user_name=body.user_name,
         password=body.password,
         tg_username=body.tg_username,
-        is_tg_subscribed=body.is_tg_subscribe,
+        is_tg_subscribed=body.is_tg_subscribed, 
         is_admin=body.is_admin,
         theme=body.theme,
         notification_push=body.notification_push
@@ -67,7 +71,7 @@ async def post_user(body: UserDb, session: SessionDep):
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
-    return UserDb.from_orm(new_user)
+    return new_user
 
 @router.put("/{user_id}",response_model=UserDb)
 async def update_user(user_id:int, body: UserDb, session: SessionDep):
@@ -82,7 +86,7 @@ async def update_user(user_id:int, body: UserDb, session: SessionDep):
         user.password = body.password
     session.commit()
     session.refresh(user)
-    return UserDb.from_orm(user)
+    return user
 
 @router.delete("/{user_id}", status_code = status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, session: SessionDep):

@@ -118,7 +118,7 @@ class Review(Base):
             comment="Время анализа"
         )
     
-    class Mistacke_Type(Base):
+    class Mistake_Type(Base):
         __tablename__ = "mistake_types"
         __table_args__={"comment":"Типы ошибок"}
         
