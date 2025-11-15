@@ -1,5 +1,5 @@
 from typing import Annotated
-
+from typing import Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from fastapi import HTTPException
@@ -28,7 +28,7 @@ class UserDb(BaseModel):
     tg_username:str = Field(description="Telegram",default=None)
     is_tg_subscribed:bool = Field(description="Проверка подписки",default=False)
     is_admin:bool = Field(description="Проверка на админа")
-    theme:str = Field(description="Тема интерфейса Dark/Light")
+    theme:Literal["Dark", "Light"] = Field(description="Тема интерфейса Dark/Light")
     notification_push = Field(description="Уведомления в браузере ON/OFF")
 
 

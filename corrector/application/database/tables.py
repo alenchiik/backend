@@ -3,6 +3,7 @@ from datetime import date, time
 from decimal import Decimal
 from sqlalchemy import MetaData, ForeignKey, BigInteger, Boolean, Integer, Date, Time, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+from typing import Literal, Mapped
 
 
 
@@ -41,7 +42,10 @@ class User(Base):
         nullable=False,
         comment="Проверка на админа"
     )
-    theme: Mapped[str]=mapped_column(nullable=False, comment="Тема приложения Dark/Light")
+    theme: Mapped[Literal["Dark", "Light"]] = mapped_column(
+    nullable=False,
+    comment="Тема приложения Dark/Light"
+    )
     notification_push: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
