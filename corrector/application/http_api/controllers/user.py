@@ -25,7 +25,13 @@ class UserDb(BaseModel):
     patronomic_name: str = Field(description="Отчество")
     user_name: str = Field(description="Логин")
     password: str = Field(description="Пароль")
-    
+    tg_username:str = Field(description="Telegram")
+    is_tg_subscribed:bool = Field(description="Проверка подписки",default=False)
+    is_admin:bool = Field(description="Проверка на админа")
+    theme:str = Field(description="Тема интерфейса Dark/Light")
+    notification_push = Field(description="Уведомления в браузере ON/OFF")
+
+
 @router.get(path='', response_model=list[UserDb])
 async def get_users(session: SessionDep):
     """Запрос: получение списка пользователей"""
@@ -51,7 +57,12 @@ async def post_user(body: UserDb, session: SessionDep):
         surname_name=body.surname_name,
         patronomic_name=body.patronomic_name,
         user_name=body.user_name,
-        password=body.password
+        password=body.password,
+        tg_username=body.tg_username,
+        is_tg_subscribed=body.is_tg_subscribe,
+        is_admin=body.is_admin,
+        theme=body.theme,
+        notification_push=body.notification_push
     )
     session.add(new_user)
     session.commit()
