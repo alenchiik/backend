@@ -259,7 +259,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="S8LBVOHiq-nBGcDiYyk8-2" value="&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-weight: 700; text-wrap-mode: wrap;&quot;&gt;Statuses&lt;/span&gt;" style="swimlane;html=1;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=light-dark(#e51400, #c77eff);horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;swimlaneFillColor=#ffffff;align=center;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=14;fontColor=#ffffff;strokeColor=light-dark(#B20000, #c77eff);" vertex="1" parent="1">
-          <mxGeometry x="900" y="830" width="370" height="90" as="geometry" />
+          <mxGeometry x="900" y="830" width="370" height="110" as="geometry" />
         </mxCell>
         <mxCell id="S8LBVOHiq-nBGcDiYyk8-3" value="id&amp;nbsp;&lt;span style=&quot;font-weight: normal;&quot;&gt;= int&amp;nbsp;unsigned auto_increment&amp;nbsp;&lt;/span&gt;" style="shape=partialRectangle;top=0;left=0;right=0;bottom=1;html=1;align=left;verticalAlign=middle;fillColor=none;spacingLeft=60;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;dropTarget=0;fontStyle=5;" vertex="1" parent="S8LBVOHiq-nBGcDiYyk8-2">
           <mxGeometry y="26" width="370" height="30" as="geometry" />
@@ -267,11 +267,11 @@
         <mxCell id="S8LBVOHiq-nBGcDiYyk8-4" value="PK" style="shape=partialRectangle;fontStyle=1;top=0;left=0;bottom=0;html=1;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[];portConstraint=eastwest;part=1;" vertex="1" connectable="0" parent="S8LBVOHiq-nBGcDiYyk8-3">
           <mxGeometry width="30" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="S8LBVOHiq-nBGcDiYyk8-5" value="&lt;div style=&quot;line-height: 90%;&quot;&gt;status_name =&amp;nbsp; literal (&#39;dark&#39;,&#39;light&#39;) not nul&lt;/div&gt;" style="shape=partialRectangle;top=0;left=0;right=0;bottom=0;html=1;align=left;verticalAlign=top;fillColor=none;spacingLeft=60;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;dropTarget=0;fillOpacity=100;autosize=0;fixedWidth=0;movableLabel=0;" vertex="1" parent="S8LBVOHiq-nBGcDiYyk8-2">
-          <mxGeometry y="56" width="370" height="34" as="geometry" />
+        <mxCell id="S8LBVOHiq-nBGcDiYyk8-5" value="&lt;div style=&quot;line-height: 90%;&quot;&gt;status_name =&amp;nbsp; literal (&#39;Загружен&#39;,&#39;Анализируется&#39;,&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&#39;Проверено&#39;,&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&#39;Отправлен на доработку&#39;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;) not nul&lt;/span&gt;&lt;/div&gt;" style="shape=partialRectangle;top=0;left=0;right=0;bottom=0;html=1;align=left;verticalAlign=top;fillColor=none;spacingLeft=60;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;dropTarget=0;fillOpacity=100;autosize=0;fixedWidth=0;movableLabel=0;" vertex="1" parent="S8LBVOHiq-nBGcDiYyk8-2">
+          <mxGeometry y="56" width="370" height="54" as="geometry" />
         </mxCell>
         <mxCell id="S8LBVOHiq-nBGcDiYyk8-6" value="&lt;b&gt;UQ&lt;/b&gt;" style="shape=partialRectangle;top=0;left=0;bottom=0;html=1;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[];portConstraint=eastwest;part=1;" vertex="1" connectable="0" parent="S8LBVOHiq-nBGcDiYyk8-5">
-          <mxGeometry width="31.200000000000003" height="34" as="geometry" />
+          <mxGeometry width="31.200000000000003" height="54" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
