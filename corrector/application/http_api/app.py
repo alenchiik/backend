@@ -27,10 +27,8 @@ def create_app(
         allow_methods=["*"],  # Разрешить все методы (GET, POST, PUT, DELETE и т.д.)
         allow_headers=["*"],  # Разрешить все заголовки
     )
-    app.include_router(controllers.user_router)
     app.include_router(controllers.status_router)
-    app.include_router(controllers.review_router)
-    app.include_router(controllers.maistake_router)
-    app.include_router(controllers.mistake_type_router)
     app.include_router(controllers.document_router)
+    app.include_router(controllers.mistake_type_router)
+    app.include_router(controllers.mistake_router)
     return app
