@@ -3,12 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from decimal import Decimal
 from datetime import date, time
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from typing import Literal, List, Optional
 
 from corrector.application.database import get_session
-from corrector.application.database.tables import Document
+from corrector.application.database.tables import Document, Status, Mistake
+from corrector.application.http_api.controllers.mistake import MistakeDTO
+from corrector.application.http_api.controllers.status import StatusResponse
 
 router = APIRouter(
     prefix="/documents", 
@@ -49,10 +51,22 @@ async def get_documents(session: SessionDep):
     """Запрос: получение списка документов"""
     return session.scalars(select(Document)).all()
 
-@router.get("/{document_id}")
+
+class DocumentDTO(BaseModel):
+    id: int | None = Field(description="Идентификатор", default=None)
+    file_name: str = Field(description="Имя файла", max_length=255)
+    status: StatusResponse
+    mistakes: List[MistakeDTO] = []
+
+@router.get(path="{document_id}", response_model=DocumentDTO)
 async def get_document_by_id(document_id: int, session: SessionDep):
-    """Запрос: получение документа по ID"""
-    document = session.get(Document, document_id)
+    """Запрос: получение документа с его статусом"""
+    document = session.execute(
+        select(Document)
+        .options(joinedload(Document.status),joinedload(Document.mistakes))
+        .filter(Document.id == document_id)
+    ).scalar()
     if not document:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Документ не найден")
-    return {"file_name": document.file_name}
+    
+    return document 

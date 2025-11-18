@@ -15,6 +15,14 @@ router = APIRouter(
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+class StatusResponse(BaseModel):
+    status_name: Literal[
+        "Загружен",
+        "Анализируется",
+        "Проверен",
+        "Отправлен на доработку",
+        "Идеален"
+    ] = Field(description="Наименование статуса")
 
 class StatusDb(BaseModel):
     """Статус"""
@@ -27,6 +35,9 @@ class StatusDb(BaseModel):
         "Отправлен на доработку",
         "Идеален"
     ] = Field(description="Наименование статуса")
+
+class Config:
+        orm_mode = True
 
 
 @router.get(path="", response_model=list[StatusDb])
@@ -51,3 +62,5 @@ async def get_documents_by_status(status_id: int, session: SessionDep):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Статус не найден")
     documents = status.documents
     return documents
+
+

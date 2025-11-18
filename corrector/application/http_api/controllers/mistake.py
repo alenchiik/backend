@@ -65,3 +65,9 @@ async def delete_mistake(mistake_id: int, session: SessionDep):
     session.delete(mistake)
     session.commit()
     return None
+
+
+class MistakeDTO(BaseModel):
+    id: int | None = Field(description="Идентификатор", default=None)
+    description: str = Field(description="Описание ошибки", max_length=255)
+    critical_status: Literal["Критично","Замечание"] = Field(description="Статус важности")
