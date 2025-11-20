@@ -34,4 +34,5 @@ def create_app(
     app.include_router(controllers.user_router)
     app.include_router(controllers.review_router)
     app.include_router(controllers.auth_router)
+    app.include_router(controllers.upload_doc_router)
     return app

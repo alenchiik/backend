@@ -5,3 +5,4 @@ from .mistake import router as mistake_router
 from .user import router as user_router
 from .review import router as review_router
 from .auth import router as auth_router
+from .upload_doc import router as upload_doc_router
