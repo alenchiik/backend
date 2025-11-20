@@ -1,8 +1,8 @@
-"""mig2
+"""mig3
 
-Revision ID: 05cb9c69eb2e
-Revises: 
-Create Date: 2025-11-18 18:11:22.292582
+Revision ID: 845b784b6767
+Revises: 1d8296276ddd
+Create Date: 2025-11-20 07:07:51.064528
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '05cb9c69eb2e'
-down_revision = None
+revision = '845b784b6767'
+down_revision = '1d8296276ddd'
 branch_labels = None
 depends_on = None
 
@@ -34,6 +34,10 @@ def upgrade():
                existing_type=sa.NUMERIC(precision=5, scale=0),
                nullable='False',
                existing_comment='Размер файла')
+    op.alter_column('documents', 'user_id',
+               existing_type=sa.INTEGER(),
+               nullable='False',
+               existing_comment='Связь с User')
     op.alter_column('documents', 'status_id',
                existing_type=sa.INTEGER(),
                nullable='False',
@@ -47,6 +51,10 @@ def downgrade():
                existing_type=sa.INTEGER(),
                nullable=True,
                existing_comment='Связь с Status')
+    op.alter_column('documents', 'user_id',
+               existing_type=sa.INTEGER(),
+               nullable=True,
+               existing_comment='Связь с User')
     op.alter_column('documents', 'size',
                existing_type=sa.NUMERIC(precision=5, scale=0),
                nullable=True,

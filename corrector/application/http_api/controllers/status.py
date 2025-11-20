@@ -36,8 +36,6 @@ class StatusDb(BaseModel):
         "Идеален"
     ] = Field(description="Наименование статуса")
 
-class Config:
-        orm_mode = True
 
 
 @router.get(path="", response_model=list[StatusDb])

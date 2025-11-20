@@ -52,7 +52,8 @@ class User(Base):
         nullable=False,
         comment="Уведомления в браузере on/off"
     )
-    # documents: Mapped[list['Document']] = relationship()
+    documents: Mapped[list['Document']] = relationship("Document", back_populates="user")
+    reviews: Mapped[list['Review']] = relationship("Review", back_populates="user")
 
 class Review(Base):
     __tablename__= "reviews"
@@ -72,6 +73,7 @@ class Review(Base):
        nullable=False,
        comment="Время отправки отзыва"
     )
+    user: Mapped["User"] = relationship("User",back_populates="reviews")
     
 class Status(Base):
     __tablename__= "statuses"
@@ -104,11 +106,11 @@ class Document(Base):
         nullable="False",
         comment="Размер файла"
     )
-    # user_id: Mapped[int] = mapped_column(
-    #     ForeignKey("users.id"),
-    #    nullable="False",
-    #     comment="Связь с User"
-    # )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable="False",
+        comment="Связь с User"
+    )
     status_id: Mapped[int] = mapped_column(
         ForeignKey("statuses.id"),
         nullable = "False",
@@ -127,6 +129,9 @@ class Document(Base):
     )
     mistakes: Mapped[List["Mistake"]] = relationship("Mistake",back_populates="document",cascade="all, delete-orphan",lazy="selectin")
     status: Mapped["Status"] = relationship("Status", back_populates="documents")  
+    user: Mapped["User"] = relationship("User",back_populates="documents")
+                                        
+                                        
 class MistakeType(Base):
    __tablename__ = "mistake_types"
    __table_args__={"comment":"Типы ошибок"}
