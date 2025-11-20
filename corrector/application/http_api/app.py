@@ -33,4 +33,5 @@ def create_app(
     app.include_router(controllers.mistake_router)
     app.include_router(controllers.user_router)
     app.include_router(controllers.review_router)
+    app.include_router(controllers.auth_router)
     return app

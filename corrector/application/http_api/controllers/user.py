@@ -11,6 +11,11 @@ from corrector.application.database.tables import User, Document
 from corrector.application.http_api.controllers.document import DocumentBase, DocumentDTO
 from corrector.application.http_api.controllers.mistake import MistakeDTO
 from corrector.application.http_api.controllers.status import StatusResponse
+from corrector.application.http_api.controllers.auth import get_password_hash
+
+
+# Импортируем функции из того же файла (если они в одном файле)
+# Если функции в том же файле, они уже доступны
 
 router = APIRouter(
     prefix="/users", 
@@ -18,7 +23,7 @@ router = APIRouter(
 )
 SessionDep = Annotated[Session, Depends(get_session)]
 
-# Pydantic модели
+
 class UserDTO(BaseModel):
     first_name: str = Field(description="Имя пользователя", max_length=255)
     user_name: str = Field(description="Логин", max_length=255)
@@ -45,16 +50,6 @@ class UserCreate(BaseModel):
     theme: Literal["dark", "light"] = Field("light", description="Тема приложения")
     notification_push: bool = Field(False, description="Уведомления в браузере")
 
-class UserRegistration(BaseModel):
-    user_name: str = Field(description="Логин", max_length=255)
-    password: str = Field(description="Пароль", max_length=255)
-    first_name: str = Field(description="Имя пользователя", max_length=255)
-    last_name: str = Field(description="Фамилия пользователя", max_length=255)
-
-class UserLogin(BaseModel):
-    user_name: str = Field(description="Логин", max_length=255)
-    password: str = Field(description="Пароль", max_length=255)
-
 class UserUpdate(BaseModel):
     first_name: str | None = Field(None, description="Имя пользователя", max_length=255)
     surname_name: str | None = Field(None, description="Фамилия пользователя", max_length=255)
@@ -62,43 +57,40 @@ class UserUpdate(BaseModel):
     password: str | None = Field(None, description="Пароль", max_length=255)
     user_name: str | None = Field(None, description="Логин", max_length=255)
     tg_username: str | None = Field(None, description="Telegram username", max_length=255)
-    is_tg_subscribed: bool | None = Field(None, description="Подписка на канал")
     theme: Literal["dark", "light"] | None = Field(None, description="Тема приложения")
     notification_push: bool | None = Field(None, description="Уведомления в браузере")
 
-@router.get(path="", response_model=list[UserDb])
-async def get_users(session: SessionDep):
-    """Запрос: получение списка всех пользователей"""
-    return session.scalars(select(User)).all()
-
-@router.get("/{user_id}", response_model=UserDb)
-async def get_user(user_id: int, session: SessionDep):
-    """Запрос: получение пользователя по ID"""
-    user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-    return user
+# ИСПРАВЛЕННЫЕ ЭНДПОИНТЫ С ХЭШИРОВАНИЕМ ПАРОЛЕЙ
 
 @router.post(path="", response_model=UserDb)
 async def create_user(user_data: UserCreate, session: SessionDep):
     """Запрос: создание нового пользователя"""
+    # Проверка существования пользователя с таким логином
     existing_user = session.scalar(select(User).where(User.user_name == user_data.user_name))
     if existing_user:
         raise HTTPException(status_code=400, detail="Пользователь с таким логином уже существует")
+    
+    # Проверка существования пользователя с таким Telegram username
     if user_data.tg_username:
         existing_tg = session.scalar(select(User).where(User.tg_username == user_data.tg_username))
         if existing_tg:
             raise HTTPException(status_code=400, detail="Пользователь с таким Telegram username уже существует")
+    
+    # ХЭШИРОВАНИЕ ПАРОЛЯ ПЕРЕД СОХРАНЕНИЕМ
+    hashed_password = get_password_hash(user_data.password)
+    
+    # Создание пользователя с хэшированным паролем
     user = User(
         first_name=user_data.first_name,
         surname_name=user_data.surname_name,
         patronomic_name=user_data.patronomic_name,
         user_name=user_data.user_name,
-        password=user_data.password,  # В реальном приложении нужно хэшировать пароль
+        password=hashed_password,  # Используем хэшированный пароль
         tg_username=user_data.tg_username,
         theme=user_data.theme,
         notification_push=user_data.notification_push
     )
+    
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -110,32 +102,61 @@ async def update_user(user_id: int, user_data: UserUpdate, session: SessionDep):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    # Проверка уникальности логина, если изменяется
     if user_data.user_name and user_data.user_name != user.user_name:
         existing_user = session.scalar(select(User).where(User.user_name == user_data.user_name))
         if existing_user:
             raise HTTPException(status_code=400, detail="Пользователь с таким логином уже существует")
+    
+    # Проверка уникальности Telegram username, если изменяется
     if user_data.tg_username and user_data.tg_username != user.tg_username:
         existing_tg = session.scalar(select(User).where(User.tg_username == user_data.tg_username))
         if existing_tg:
             raise HTTPException(status_code=400, detail="Пользователь с таким Telegram username уже существует")
+    
+    # Получаем данные для обновления
     update_data = user_data.model_dump(exclude_unset=True)
+    
+    # ЕСЛИ ПЕРЕДАН ПАРОЛЬ - ХЭШИРУЕМ ЕГО
+    if 'password' in update_data and update_data['password']:
+        update_data['password'] = get_password_hash(update_data['password'])
+    
+    # Обновляем поля
     for field, value in update_data.items():
         setattr(user, field, value)
+    
     session.commit()
     session.refresh(user)
     return user
 
-@router.delete(path="/{user_id}")
+# Остальные ваши эндпоинты остаются без изменений
+@router.get(path="", response_model=list[UserDb])
+async def get_users(session: SessionDep):
+    """Запрос: получение списка пользователей"""
+    return session.scalars(select(User)).all()
+
+@router.get(path="/{user_id}", response_model=UserDb)
+async def get_user(user_id: int, session: SessionDep):
+    """Запрос: получение пользователя по ID"""
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    return user
+
+@router.delete("/{user_id}")
 async def delete_user(user_id: int, session: SessionDep):
     """Запрос: удаление пользователя"""
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
     session.delete(user)
     session.commit()
-    return StatusResponse(message="Пользователь успешно удален")
+    
+    return {"message": "Пользователь успешно удален"}
 
-@router.get(path="/{user_id}/documents", response_model=list[DocumentBase])
+@router.get("/{user_id}/documents", response_model=list[DocumentBase])
 async def get_user_documents(user_id: int, session: SessionDep):
     """Запрос: получение всех документов пользователя"""
     user = session.get(User, user_id)
@@ -145,7 +166,7 @@ async def get_user_documents(user_id: int, session: SessionDep):
     documents = session.scalars(select(Document).where(Document.user_id == user_id)).all()
     return documents
 
-@router.get(path="/username/{username}", response_model=UserDb)
+@router.get("/username/{username}", response_model=UserDb)
 async def get_user_by_username(username: str, session: SessionDep):
     """Запрос: получение пользователя по логину"""
     user = session.scalar(select(User).where(User.user_name == username))
@@ -153,41 +174,7 @@ async def get_user_by_username(username: str, session: SessionDep):
         raise HTTPException(status_code=404, detail="Пользователь не найден")
     return user
 
-@router.post("/register", response_model=UserDb)
-async def register_user(registration_data: UserRegistration, session: SessionDep):
-    """Запрос: регистрация пользователя"""
-    existing_user = session.scalar(select(User).where(User.user_name == registration_data.user_name))
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Пользователь с таким логином уже существует")
-    user = User(
-        first_name=registration_data.first_name,
-        surname_name=registration_data.last_name,
-        user_name=registration_data.user_name,
-        password=registration_data.password,  # В реальном приложении нужно хэшировать пароль
-        theme="light",
-        notification_push=False
-    )
-    
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    
-    return user
-
-@router.post("/login")
-async def login_user(login_data: UserLogin, session: SessionDep):
-    """Запрос: аутентификация пользователя"""
-    user = session.scalar(select(User).where(User.user_name == login_data.user_name))
-    if not user or user.password != login_data.password:  # В реальном приложении использовать хэширование
-        raise HTTPException(status_code=401, detail="Неверный логин или пароль")
-
-    return {
-        "message": "Успешная аутентификация",
-        "user_id": user.id,
-        "is_admin": user.is_admin
-    }
-
-@router.get(path="", response_model=list[DocumentBase])
+@router.get("/{user_id}/documents/status", response_model=list[DocumentBase])
 async def get_user_documents_status(user_id: int, session: SessionDep):
     """Запрос: получение всех документов пользователя с их статусами"""
     user = session.get(User, user_id)
